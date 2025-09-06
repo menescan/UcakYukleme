@@ -38,10 +38,9 @@ const WATER_INDEXES = {
 const AIRCRAFT_CONFIGS = {
   'A319': {
     name: 'Airbus A319',
-    compartments: ['Compartment 1', 'Compartment 3', 'Compartment 4', 'Compartment 5'],
+    compartments: ['Compartment 1', 'Compartment 4', 'Compartment 5'],
     uldPositions: {
       'Compartment 1': ['11P', '12P'],
-      'Compartment 3': ['31P', '32P'],
       'Compartment 4': ['41P', '42P'],
       'Compartment 5': ['5 (Bulk)'],
     },
@@ -336,10 +335,7 @@ export default function AircraftCargoManager() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {aircraftConfig.compartments.map((compartment, index) => {
-                  let positions = aircraftConfig.uldPositions[compartment];
-                  if (selectedAircraft === 'A319' && compartment === 'Compartment 3' && positions) {
-                    positions = positions.filter(pos => pos !== '33P');
-                  }
+                  const positions = aircraftConfig.uldPositions[compartment];
                   // B737 için ULD inputlarını ve ULD yükleme formunu gösterme
                   if (selectedAircraft === 'B737' && loadingType === 'uld') return null;
                   return (
