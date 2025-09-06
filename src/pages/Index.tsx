@@ -171,67 +171,6 @@ export default function AircraftCargoManager() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-md mx-auto space-y-6">
-        {selectedAircraft && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Su Yüzdesi Seçimi</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 mb-4">
-                {['%25', '%50', '%75'].map((percent) => (
-                  <Button
-                    key={percent}
-                    variant={selectedWaterPercent === percent ? 'default' : 'outline'}
-                    onClick={() => setSelectedWaterPercent(percent)}
-                  >
-                    {percent}
-                  </Button>
-                ))}
-              </div>
-              {selectedWaterPercent && (
-                <div className="p-3 bg-blue-100 rounded-md">
-                  <div className="font-semibold mb-2">Su İndeksleri</div>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-blue-200">
-                        <th className="p-1">Uçak</th>
-                        <th className="p-1">%25</th>
-                        <th className="p-1">%50</th>
-                        <th className="p-1">%75</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(WATER_INDEXES).map(([model]) => (
-                        <tr
-                          key={model}
-                          className={
-                            isB737Selected && (model === 'B737 800' || model === 'B737 900')
-                              ? 'bg-blue-50 font-bold'
-                              : getWaterIndexKey() === model
-                              ? 'bg-blue-50 font-bold'
-                              : ''
-                          }
-                        >
-                          <td className="p-1">{model}</td>
-                          {['%25', '%50', '%75'].map((percent) => (
-                            <td className="p-1" key={percent}>
-                              {WATER_INDEXES[model][percent]?.join(' / ')}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="mt-3 text-blue-900">
-                    <span className="font-medium">Seçili Uçak:</span> {getWaterIndexKey()}<br />
-                    <span className="font-medium">Seçili Yüzde:</span> {selectedWaterPercent}<br />
-                    <span className="font-medium">İndeks:</span> {WATER_INDEXES[getWaterIndexKey()][selectedWaterPercent]?.join(' / ')}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">✈️ Uçak Kargo Yöneticisi</h1>
           <p className="text-sm text-gray-600">Kargo ve bagaj yönetim sistemi</p>
@@ -291,6 +230,67 @@ export default function AircraftCargoManager() {
                     min="1"
                     max="50"
                   />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+        {selectedAircraft && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Su Yüzdesi Seçimi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-4">
+                {['%25', '%50', '%75'].map((percent) => (
+                  <Button
+                    key={percent}
+                    variant={selectedWaterPercent === percent ? 'default' : 'outline'}
+                    onClick={() => setSelectedWaterPercent(percent)}
+                  >
+                    {percent}
+                  </Button>
+                ))}
+              </div>
+              {selectedWaterPercent && (
+                <div className="p-3 bg-blue-100 rounded-md">
+                  <div className="font-semibold mb-2">Su İndeksleri</div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-blue-200">
+                        <th className="p-1">Uçak</th>
+                        <th className="p-1">%25</th>
+                        <th className="p-1">%50</th>
+                        <th className="p-1">%75</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(WATER_INDEXES).map(([model]) => (
+                        <tr
+                          key={model}
+                          className={
+                            isB737Selected && (model === 'B737 800' || model === 'B737 900')
+                              ? 'bg-blue-50 font-bold'
+                              : getWaterIndexKey() === model
+                              ? 'bg-blue-50 font-bold'
+                              : ''
+                          }
+                        >
+                          <td className="p-1">{model}</td>
+                          {['%25', '%50', '%75'].map((percent) => (
+                            <td className="p-1" key={percent}>
+                              {WATER_INDEXES[model][percent]?.join(' / ')}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="mt-3 text-blue-900">
+                    <span className="font-medium">Seçili Uçak:</span> {getWaterIndexKey()}<br />
+                    <span className="font-medium">Seçili Yüzde:</span> {selectedWaterPercent}<br />
+                    <span className="font-medium">İndeks:</span> {WATER_INDEXES[getWaterIndexKey()][selectedWaterPercent]?.join(' / ')}
+                  </div>
                 </div>
               )}
             </CardContent>
