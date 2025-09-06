@@ -223,15 +223,19 @@ export default function AircraftCargoManager() {
                 >
                   Bulk Yükleme
                 </Button>
-                <Button
-                  variant={loadingType === 'uld' ? 'default' : 'outline'}
-                  onClick={() => handleLoadingTypeSelect('uld')}
-                  className="h-12"
-                >
-                  ULD Yükleme
-                </Button>
+                {/* B737 için ULD yükleme seçeneği gösterilmez */}
+                {selectedAircraft !== 'B737' && (
+                  <Button
+                    variant={loadingType === 'uld' ? 'default' : 'outline'}
+                    onClick={() => handleLoadingTypeSelect('uld')}
+                    className="h-12"
+                  >
+                    ULD Yükleme
+                  </Button>
+                )}
               </div>
-              {(loadingType === 'bulk' || loadingType === 'uld') && (
+              {/* Ortalama bagaj ağırlığı inputu her iki tipte de gösterilir */}
+              {(loadingType === 'bulk' || (loadingType === 'uld' && selectedAircraft !== 'B737')) && (
                 <div className="pt-3 border-t">
                   <Label htmlFor="avgWeight" className="text-sm font-medium">
                     Ortalama Bagaj Ağırlığı (kg)
@@ -336,6 +340,8 @@ export default function AircraftCargoManager() {
                   if (selectedAircraft === 'A319' && compartment === 'Compartment 3' && positions) {
                     positions = positions.filter(pos => pos !== '33P');
                   }
+                  // B737 için ULD inputlarını ve ULD yükleme formunu gösterme
+                  if (selectedAircraft === 'B737' && loadingType === 'uld') return null;
                   return (
                     <div key={compartment} className="p-4 border rounded-lg bg-white/50">
                       <div className="flex justify-between items-center mb-3">
@@ -370,7 +376,7 @@ export default function AircraftCargoManager() {
                           </div>
                         </div>
                       )}
-                      {loadingType === 'uld' && positions && (
+                      {loadingType === 'uld' && positions && selectedAircraft !== 'B737' && (
                         <div className="space-y-4">
                           {positions.map((position) => {
                             const positionKey = `${compartment}-${position}`;
