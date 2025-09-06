@@ -188,7 +188,7 @@ export default function AircraftCargoManager() {
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">✈️ Uçak Kargo Yöneticisi</h1>
-          <p className="text-sm text-gray-600">Kargo ve bagaj yönetim sistemi</p>
+          <p className="text-sm text-gray-600">Balans hesaplama yardım sistemi</p>
           <p className="text-xs text-gray-400 opacity-60">Muhammed Enes İŞCAN tarafından geliştirildi</p>
         </div>
         <Card>
