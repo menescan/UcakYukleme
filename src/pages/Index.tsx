@@ -88,7 +88,7 @@ interface CompartmentData {
 export default function AircraftCargoManager() {
   const [selectedAircraft, setSelectedAircraft] = useState('');
   const [loadingType, setLoadingType] = useState('');
-  const [averageBaggageWeight, setAverageBaggageWeight] = useState(23);
+  const [averageBaggageWeight, setAverageBaggageWeight] = useState<number | ''>('');
   const [compartmentData, setCompartmentData] = useState<Record<string, CompartmentData>>({});
   const [uldWeights, setUldWeights] = useState<Record<string, number>>({});
   const [eicWeight, setEicWeight] = useState(35);
@@ -114,14 +114,25 @@ export default function AircraftCargoManager() {
     setUldWeights({});
   };
 
+  // ULD pozisyonlarında bagaj veya kargo girildiğinde ULD ağırlığı otomatik 65 atanır
   const updateCompartmentData = (compartment: string, field: keyof CompartmentData, value: number) => {
-    setCompartmentData(prev => ({
-      ...prev,
-      [compartment]: {
-        ...prev[compartment],
-        [field]: value,
-      },
-    }));
+    setCompartmentData(prev => {
+      const newData = {
+        ...prev,
+        [compartment]: {
+          ...prev[compartment],
+          [field]: value,
+        },
+      };
+      // ULD yükleme ve pozisyon ise, bagaj veya kargo girildiyse ULD ağırlığı 65 olarak atanır
+      if (loadingType === 'uld' && (field === 'baggageCount' || field === 'cargoWeight')) {
+        const isUldPosition = compartment.includes('-') && !compartment.includes('Bulk');
+        if (isUldPosition && value > 0) {
+          setUldWeights(prevUld => ({ ...prevUld, [compartment]: 65 }));
+        }
+      }
+      return newData;
+    });
   };
 
   const calculateCompartmentWeight = (compartment: string): number => {
@@ -132,7 +143,7 @@ export default function AircraftCargoManager() {
     if (loadingType === 'bulk') {
       const data = compartmentData[compartment];
       if (data) {
-        const baggageWeight = data.baggageCount ? data.baggageCount * averageBaggageWeight : 0;
+        const baggageWeight = data.baggageCount && averageBaggageWeight !== '' ? data.baggageCount * Number(averageBaggageWeight) : 0;
         const cargoWeight = data.bulkCargoWeight || 0;
         baseWeight = baggageWeight + cargoWeight;
       }
@@ -140,10 +151,14 @@ export default function AircraftCargoManager() {
       positions.forEach(position => {
         const positionKey = `${compartment}-${position}`;
         const data = compartmentData[positionKey];
-        const uldWeight = uldWeights[positionKey] || 0;
-        const baggageWeight = data?.baggageCount ? data.baggageCount * averageBaggageWeight : 0;
+        let uldWeight = uldWeights[positionKey];
+        // Eğer uldWeight yoksa ve bagaj/kargo girildiyse otomatik 65
+        if ((data?.baggageCount || data?.cargoWeight) && (!uldWeight || uldWeight === 0)) {
+          uldWeight = 65;
+        }
+        const baggageWeight = data?.baggageCount && averageBaggageWeight !== '' ? data.baggageCount * Number(averageBaggageWeight) : 0;
         const cargoWeight = data?.cargoWeight || 0;
-        baseWeight += baggageWeight + cargoWeight + uldWeight;
+        baseWeight += baggageWeight + cargoWeight + (uldWeight || 0);
       });
     }
     if (compartment === eicCompartment) {
@@ -224,8 +239,16 @@ export default function AircraftCargoManager() {
                   <Input
                     id="avgWeight"
                     type="number"
-                    value={averageBaggageWeight}
-                    onChange={(e) => setAverageBaggageWeight(Number(e.target.value))}
+                    value={averageBaggageWeight === '' ? '' : averageBaggageWeight}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setAverageBaggageWeight('');
+                      } else {
+                        const num = Number(val);
+                        setAverageBaggageWeight(isNaN(num) ? '' : num);
+                      }
+                    }}
                     className="mt-1"
                     min="1"
                     max="50"
@@ -361,8 +384,15 @@ export default function AircraftCargoManager() {
                                     <Input
                                       id={`baggage-${positionKey}`}
                                       type="number"
-                                      value={compartmentData[positionKey]?.baggageCount || ''}
-                                      onChange={(e) => updateCompartmentData(positionKey, 'baggageCount', Number(e.target.value))}
+                                      value={compartmentData[positionKey]?.baggageCount ?? ''}
+                                      onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        updateCompartmentData(positionKey, 'baggageCount', val);
+                                        // Bagaj/kargo girildiyse veya 0 girildiyse ULD ağırlığı otomatik 65
+                                        if ((val >= 0) && (!uldWeights[positionKey] || uldWeights[positionKey] === 0)) {
+                                          setUldWeights(prev => ({ ...prev, [positionKey]: 65 }));
+                                        }
+                                      }}
                                       className="mt-1 h-8 text-sm"
                                       min="0"
                                     />
@@ -372,8 +402,14 @@ export default function AircraftCargoManager() {
                                     <Input
                                       id={`cargo-${positionKey}`}
                                       type="number"
-                                      value={compartmentData[positionKey]?.cargoWeight || ''}
-                                      onChange={(e) => updateCompartmentData(positionKey, 'cargoWeight', Number(e.target.value))}
+                                      value={compartmentData[positionKey]?.cargoWeight ?? ''}
+                                      onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        updateCompartmentData(positionKey, 'cargoWeight', val);
+                                        if ((val >= 0) && (!uldWeights[positionKey] || uldWeights[positionKey] === 0)) {
+                                          setUldWeights(prev => ({ ...prev, [positionKey]: 65 }));
+                                        }
+                                      }}
                                       className="mt-1 h-8 text-sm"
                                       min="0"
                                     />
@@ -385,9 +421,13 @@ export default function AircraftCargoManager() {
                                     <Input
                                       id={`uld-${positionKey}`}
                                       type="number"
-                                      value={uldWeights[positionKey] || ''}
-                                      onChange={(e) => setUldWeights(prev => ({ ...prev, [positionKey]: Number(e.target.value) }))
-                                      }
+                                      value={uldWeights[positionKey] ?? ''}
+                                      onChange={(e) => {
+                                        let val = Number(e.target.value);
+                                        // 0 girilirse yine 65 olarak dahil edilsin
+                                        if (val === 0) val = 65;
+                                        setUldWeights(prev => ({ ...prev, [positionKey]: val }));
+                                      }}
                                       className="mt-1 h-8 text-sm"
                                       min="0"
                                     />
