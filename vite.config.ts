@@ -1,3 +1,4 @@
+// vite.config.ts dosyanızın son hali bu OLMALIDIR:
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -15,5 +16,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: process.env.NODE_ENV === 'production' ? '/UcakYukleme/' : '/', // ✅ Dinamik ayar
+  
+  // 🎯 Düzeltilmiş Base URL: Netlify ve Vercel için '/' olmalıdır.
+  base: '/', 
 }));
